@@ -1,0 +1,130 @@
+	@Override
+	public boolean actionANCC(String queryId, CreditCardBean bean1) throws SQLException, IOException {
+		BigInteger uci = null;
+		boolean result = false;
+		Connection connection = ConnectionProvider.getInstance().getConnection();
+		try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.GET_DETAILS_CREDIT_CARD_NEW)) {
+			preparedStatement.setString(1, queryId);
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+				while (resultSet.next()) {
+					uci = resultSet.getBigDecimal("UCI").toBigInteger();
+				}
+			}
+		} catch (SQLException e) {
+			log.error(Arrays.toString(e.getStackTrace()));
+		}
+		try (PreparedStatement preparedStatement2 = connection.prepareStatement(SqlQueries.ACTION_CREDIT_CARD_NEW)) {
+			preparedStatement2.setBigDecimal(1, new BigDecimal(bean1.getCreditCardNumber()));
+			preparedStatement2.setString(2, bean1.getCreditCardStatus());
+			preparedStatement2.setString(3, bean1.getNameOnCreditCard());
+			preparedStatement2.setInt(4, bean1.getCreditCvvNum());
+			preparedStatement2.setInt(5, bean1.getCreditCurrentPin());
+			preparedStatement2.setDate(6, Date.valueOf(bean1.getCreditDateOfExpiry()));
+			preparedStatement2.setBigDecimal(7, new BigDecimal(uci));
+			preparedStatement2.setString(8, bean1.getCreditCardType());
+			preparedStatement2.setInt(9, bean1.getCreditScore());
+			preparedStatement2.setBigDecimal(10, bean1.getCreditLimit());
+			preparedStatement2.setDouble(11, bean1.getIncome());
+			if (preparedStatement2.executeUpdate() > 0) {
+				result = true;
+			}
+
+		} catch (SQLException e) {
+			log.error(Arrays.toString(e.getStackTrace()));
+		}
+		return result;
+	}
+**********************************************************************
+
+	public BigInteger getNewUCI(String queryId) throws SQLException, IOException {
+		BigInteger uci = null;
+		Connection connection = ConnectionProvider.getInstance().getConnection();
+		try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.GET_CREDIT_CARD_UCI)) {
+			preparedStatement.setString(1, queryId);
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+				while (resultSet.next()) {
+					uci = resultSet.getBigDecimal("uci").toBigInteger();
+				}
+			}
+		} catch (SQLException e) {
+			log.error(Arrays.toString(e.getStackTrace()));
+		}
+		return uci;
+	}
+
+***************************************************************************
+
+	@Override
+	public String getNewType(String queryId) throws SQLException, IOException {
+		String type = "";
+		Connection connection = ConnectionProvider.getInstance().getConnection();
+		try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.GET_CREDIT_CARD_TYPE)) {
+			preparedStatement.setString(1, queryId);
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+				while (resultSet.next()) {
+					type = resultSet.getString("define_query");
+				}
+			}
+		} catch (SQLException e) {
+			log.error(Arrays.toString(e.getStackTrace()));
+		}
+		return type;
+	}
+*********************************************************************************
+
+	@Override
+	public boolean actionANDC(String queryId, DebitCardBean bean) throws SQLException, IOException {
+		BigInteger accNum = null;
+		boolean result = false;
+		Connection connection = ConnectionProvider.getInstance().getConnection();
+		try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.GET_DETAILS_DEBIT_CARD_NEW)) {
+			preparedStatement.setString(1, queryId);
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+				while (resultSet.next()) {
+					accNum = resultSet.getBigDecimal("account_number").toBigInteger();
+				}
+			}
+		} catch (SQLException e) {
+			log.error(Arrays.toString(e.getStackTrace()));
+		}
+		try (PreparedStatement preparedStatement2 = connection.prepareStatement(SqlQueries.ACTION_DEBIT_CARD_NEW)) {
+			preparedStatement2.setBigDecimal(1, new BigDecimal(accNum));
+			preparedStatement2.setBigDecimal(2, new BigDecimal(bean.getDebitCardNumber()));
+			preparedStatement2.setString(3, bean.getDebitCardStatus());
+			preparedStatement2.setString(4, bean.getNameOnDebitCard());
+			preparedStatement2.setInt(5, bean.getDebitCvvNum());
+			preparedStatement2.setInt(6, bean.getDebitCurrentPin());
+			preparedStatement2.setDate(7, Date.valueOf(bean.getDebitDateOfExpiry()));
+			preparedStatement2.setBigDecimal(8, new BigDecimal(bean.getUCI()));
+			preparedStatement2.setString(9, bean.getDebitCardType());
+			if (preparedStatement2.executeUpdate() > 0) {
+				result = true;
+			}
+
+		} catch (SQLException e) {
+			log.error(Arrays.toString(e.getStackTrace()));
+		}
+		return result;
+	}
+
+******************************************************
+	@Override
+	public String getNewName(BigInteger uci) throws SQLException, IOException {
+		String firstname = "";
+		String lastname = "";
+		String name = "";
+		Connection connection = ConnectionProvider.getInstance().getConnection();
+		try (PreparedStatement preparedStatement = connection.prepareStatement(SqlQueries.GET_CREDIT_CARD_NAME)) {
+			preparedStatement.setBigDecimal(1, new BigDecimal(uci));
+			try (ResultSet resultSet = preparedStatement.executeQuery()) {
+				while (resultSet.next()) {
+					firstname = resultSet.getString("first_name");
+					lastname = resultSet.getString("last_name");
+					name = firstname.concat(" ").concat(lastname);
+				}
+			}
+		} catch (SQLException e) {
+			log.error(Arrays.toString(e.getStackTrace()));
+		}
+		return name;
+	}
