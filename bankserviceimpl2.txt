@@ -1,0 +1,102 @@
+	private boolean getNewCC(String queryId) throws SQLException, IOException {
+		boolean result = false;
+		BigInteger uci = bankDao.getNewUCI(queryId);
+		bean1.setUCI(uci);
+		String Name = bankDao.getNewName(uci);
+		bean1.setNameOnCreditCard(Name);
+		String cvvString = String.format("%04d", random.nextInt(1000));
+		int cvv = Integer.parseInt(cvvString);
+		bean1.setCreditCvvNum(cvv);
+		String pinString = String.format("%04d", random.nextInt(10000));
+		int pin = Integer.parseInt(pinString);
+		bean1.setCreditCurrentPin(pin);
+		Long first14 = (long) (Math.random() * 100000000000000L);
+		Long number = 5200000000000000L + first14;
+		BigInteger creditCardNumber = BigInteger.valueOf(number);
+		bean1.setCreditCardNumber(creditCardNumber);
+		String scoreString = String.format("%04d", random.nextInt(1000));
+		int score = Integer.parseInt(scoreString);
+		bean1.setCreditScore(score);
+		String incomeString = String.format("%04d", random.nextInt(100000));
+		double income = Integer.parseInt(incomeString);
+		bean1.setIncome(income);
+		String status = "Active";
+		bean1.setCreditCardStatus(status);
+		LocalDate expiry = LocalDate.now().plusYears(5);
+		bean1.setCreditDateOfExpiry(expiry);
+		String type = bankDao.getNewType(queryId);
+		if (type.equals("Platinum")) {
+			bean1.setCreditCardType("Platinum");
+			bean1.setCreditLimit(new BigDecimal(500000));
+		} else if (type.equals("Gold")) {
+			bean1.setCreditCardType("Gold");
+			bean1.setCreditLimit(new BigDecimal(100000));
+		}else if (type.equals("Silver")) {
+			bean1.setCreditCardType("Silver");
+			bean1.setCreditLimit(new BigDecimal(50000));
+		}
+
+		if (bankDao.actionANCC(queryId, bean1)) {
+			result = true;
+		}
+		return result;
+
+	}
+
+**********************************************************************
+
+	public boolean getNewDC(String queryId) throws SQLException, IOException {
+		boolean result = false;
+		BigInteger uci = bankDao.getNewUCI(queryId);
+		bean.setUCI(uci);
+		String Name = bankDao.getNewName(uci);
+		bean.setNameOnDebitCard(Name);
+		String cvvString = String.format("%04d", random.nextInt(1000));
+		int cvv = Integer.parseInt(cvvString);
+		bean.setDebitCvvNum(cvv);
+		String pinString = String.format("%04d", random.nextInt(10000));
+		int pin = Integer.parseInt(pinString);
+		bean.setDebitCurrentPin(pin);
+		Long first14 = (long) (Math.random() * 100000000000000L);
+		Long number = 5200000000000000L + first14;
+		BigInteger debitCardNumber = BigInteger.valueOf(number);
+		bean.setDebitCardNumber(debitCardNumber);
+		String status = "Active";
+		bean.setDebitCardStatus(status);
+		LocalDate expiry = LocalDate.now().plusYears(5);
+		bean.setDebitDateOfExpiry(expiry);
+		String type = bankDao.getNewType(queryId);
+		if (type.equals("Platinum")) {
+			bean.setDebitCardType("Platinum");
+		} else if (type.equals("Gold")) {
+			bean.setDebitCardType("Gold");
+		} else if (type.equals("Silver")) {
+			bean.setDebitCardType("Silver");
+		}
+		if (bankDao.actionANDC(queryId, bean)) {
+			result = true;
+		}
+		return result;
+		
+	}
+	
+************************************************************
+
+sql queries
+
+	public static final String ACTION_CREDIT_CARD_UPGRADE = "update Credit_Card SET credit_card_type=?  WHERE credit_card_num =?";
+	public static final String ACTION_DEBIT_CARD_UPGRADE = "update Debit_Card SET debit_card_type =? WHERE debit_card_num =?";
+	public static final String GET_DETAILS_CARD_UPGRADE = "SELECT card_num,define_query FROM query_log WHERE query_id =?";
+	public static final String GET_DETAILS_CARD_BLOCK = "SELECT card_num,define_query FROM query_log WHERE query_id =?";
+	public static final String ACTION_CREDIT_CARD_BLOCK = "update Credit_Card SET credit_card_status=?  WHERE credit_card_num =?";
+	public static final String ACTION_DEBIT_CARD_BLOCK = "update Debit_Card SET debit_card_status=?  WHERE debtit_card_num =?";
+	public static final String VERIFY_UCI = "Select uci from customers where Uci=?";
+	public static final String GET_CREDIT_CARD_TYPE = "Select define_query FROM query_log WHERE query_ID=?";
+	public static final String GET_CREDIT_CARD_UCI = "Select uci FROM query_log WHERE query_ID=?";
+	public static final String GET_CREDIT_CARD_NAME = "Select first_name,last_name FROM customers where uci=?";
+	public static final String GET_DETAILS_CREDIT_CARD_NEW = "SELECT uci FROM query_log WHERE query_id=?";
+	public static final String ACTION_CREDIT_CARD_NEW = "INSERT INTO credit_card(credit_card_num, credit_card_status, name_on_cred_card, credit_cvv_num,credit_current_pin, credit_expiry_date, uci, credit_card_type, credit_score, credit_limit, income )VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+	public static final String GET_DETAILS_DEBIT_CARD_NEW = "SELECT account_number FROM query_log WHERE query_id=? ";
+	public static final String ACTION_DEBIT_CARD_NEW = "INSERT INTO debit_card(account_number,debit_card_num, debit_card_status, name_on_deb_card, debit_cvv_num,debit_current_pin, debit_expiry_date, uci, debit_card_type)VALUES(?,?,?,?,?,?,?,?,?)";
+	
+	
